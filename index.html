@@ -73,6 +73,7 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
   caret-color:var(--ink);
   transition:background-color 9999s ease-in-out 0s;
 }
+input::placeholder,textarea::placeholder{color:var(--mute);opacity:.6;font-weight:400;font-size:.92em;text-overflow:ellipsis}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 .btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;transition:transform .18s ease,box-shadow .2s ease,filter .18s ease,background .2s ease}
@@ -292,8 +293,8 @@ textarea{min-height:90px}
 <h3>2. Пищевой джетлаг</h3>
 <p class="note">Во сколько обычно едите первый раз?</p>
 <div class="grid">
-<label>В будни<input id="mealWD" type="time"></label>
-<label>В выходные<input id="mealWE" type="time"></label>
+<label>В будни<input id="mealWD" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="например, 08:30"></label>
+<label>В выходные<input id="mealWE" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="например, 10:00"></label>
 </div>
 <div id="jetlagOut" class="note" style="margin:8px 0 16px"></div>
 
@@ -343,10 +344,7 @@ textarea{min-height:90px}
 
 <section id="labs"><div class="card"><h2>Проверка анализов</h2>
 <p class="sub">Введите значения — статус появится сразу. Референсы подобраны по полу и возрасту из анкеты.</p>
-<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-<button class="btn" id="labSave">Сохранить</button>
-<span class="note" id="impmsg">Значения сохраняются в анкету</span>
-</div>
+<p class="note no-print" style="margin-bottom:12px">Значения сохраняются в анкету автоматически.</p>
 <div id="labmsg"></div>
 <div class="scroll"><table><thead><tr><th>Показатель</th><th>Значение</th><th>Ед.</th><th>Норма</th><th>Статус</th></tr></thead><tbody id="labrows"></tbody></table></div>
 </div></section>
@@ -519,6 +517,15 @@ function syncYnButtons(){
     });
   });
 }
+function proteinSources(d){
+  return {
+    'Веганское':'тофу, чечевица, нут, орехи, соевый йогурт',
+    'Вегетарианское':'яйца, творог, бобовые',
+    'Халяль':'рыба, курица и говядина халяль, яйца, творог',
+    'Кошер':'кошерная курица и говядина, рыба с чешуёй, яйца, бобовые (мясо и молочное не смешивать)',
+    'Кето':'яйца, рыба, курица, сыр, творог'
+  }[d]||'рыба, курица, яйца, творог';
+}
 function jetlagHours(){
   const a=S.mealWD,b=S.mealWE;
   if(!a||!b) return null;
@@ -581,7 +588,7 @@ function updSelfTests(){
 function todayStr(){return new Date().toLocaleDateString('ru-RU')}
 
 function buildLabs(){
- $('labrows').innerHTML=LABS.map((l,i)=>`<tr><td>${l.n}</td><td><input type="number" step="any" data-lab="${i}" aria-label="${l.n}" placeholder="введите значение" value="${S['lab'+i]??''}"></td><td>${l.u}</td><td id="ref${i}"></td><td id="st${i}"></td></tr>`).join('');
+ $('labrows').innerHTML=LABS.map((l,i)=>`<tr><td>${l.n}</td><td><input type="number" step="any" autocomplete="off" data-lab="${i}" aria-label="${l.n}" value="${S['lab'+i]??''}"></td><td>${l.u}</td><td id="ref${i}"></td><td id="st${i}"></td></tr>`).join('');
  document.querySelectorAll('[data-lab]').forEach(e=>{
    const onLab=()=>{S['lab'+e.dataset.lab]=e.value.replace(',','.');autoSave();updLabs()};
    e.addEventListener('input',onLab);
@@ -668,7 +675,7 @@ function passport(){
  if(S.chronic)risks.push('Хронические заболевания: '+S.chronic);
  const bmiT=k.bmi<18.5?'ниже нормы':k.bmi<25?'норма':k.bmi<30?'избыток массы':'ожирение';
  const sys={};R.forEach(l=>(sys[l.sys]=sys[l.sys]||[]).push(l));
- const pf=S.diet=='Веганское'?'тофу, чечевица, нут, орехи':S.diet=='Вегетарианское'?'яйца, творог, бобовые':'рыба, курица, яйца, творог';
+ const pf=proteinSources(S.diet);
  const M=[['Завтрак',.25],['Обед',.35],['Полдник',.15],['Ужин',.25]];
  const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов'}[S.sport];
  const chk=['Терапевт и анализы крови — раз в год','Стоматолог — 2 раза в год'];
@@ -736,7 +743,7 @@ function buildPassportDocHtml(){
  const bmiT=k.bmi<18.5?'ниже нормы':k.bmi<25?'норма':k.bmi<30?'избыток массы':'ожирение';
  const goalTxt={lose:'Снизить вес',maintain:'Удерживать вес',gain:'Набрать вес'}[S.goal]||'Цель не выбрана';
  const stressTxt=['почти никогда','редко','иногда','часто','очень часто'][sf]||'не указано';
- const pf=S.diet=='Веганское'?'тофу, чечевица, нут, орехи':S.diet=='Вегетарианское'?'яйца, творог, бобовые':'рыба, курица, яйца, творог';
+ const pf=proteinSources(S.diet);
  const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов'}[S.sport];
  const block=(title,body)=>`<div style="margin:14px 0 8px;padding-bottom:4px;border-bottom:2px solid #D6336C;font-size:14px;font-weight:700;color:#D6336C">${title}</div><div style="font-size:13px;line-height:1.55;color:#222">${body}</div>`;
  const li=items=>items.length?`<ul style="margin:6px 0;padding-left:18px">${items.map(x=>`<li style="margin:3px 0">${x}</li>`).join('')}</ul>`:'<p style="color:#666">—</p>';
@@ -824,15 +831,15 @@ function show(t){
 const AL=['Нет','Редко','Регулярно'];
 const EX=[
   ['Здоровье',[
-    ['chronic','Хронические заболевания',null,'например, гипертония, астма — или «нет»'],
-    ['ops','Операции и травмы',null,'например, аппендэктомия 2019 — или «нет»'],
-    ['compl','Текущие жалобы',null,'например, усталость, головные боли'],
-    ['meds','Принимаемые лекарства',null,'например, витамин D 2000 МЕ — или «нет»']
+    ['chronic','Хронические заболевания',null,'например, гипертония'],
+    ['ops','Операции и травмы',null,'например, аппендэктомия'],
+    ['compl','Текущие жалобы',null,'например, усталость'],
+    ['meds','Принимаемые лекарства',null,'например, витамин D']
   ]],
   ['Питание и привычки',[
     ['meals','Приёмов пищи в день','number','например, 3'],
-    ['fav','Любимые продукты',null,'например, курица, творог, овощи'],
-    ['dis','Нелюбимые продукты',null,'например, морепродукты, брокколи'],
+    ['fav','Любимые продукты',null,'например, курица, творог'],
+    ['dis','Нелюбимые продукты',null,'например, морепродукты'],
     ['alc','Алкоголь',AL],
     ['caf','Кофеин, чашек в день','number','например, 2']
   ]],
@@ -847,7 +854,7 @@ const EX=[
     ['gym','Доступ к спортзалу',['Да','Нет']]
   ]]
 ];
-$('extra').innerHTML=EX.map(([t,fs])=>`<div class="card"><h2>${t}</h2><div class="grid">${fs.map(([id,lb,ty,ph])=>`<label>${lb}${Array.isArray(ty)?`<select id="${id}">${ty.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="${id}"${ty==='number'?' type="number"':''}${ph?` placeholder="${ph}"`:''}>`}</label>`).join('')}</div></div>`).join('');
+$('extra').innerHTML=EX.map(([t,fs])=>`<div class="card"><h2>${t}</h2><div class="grid">${fs.map(([id,lb,ty,ph])=>`<label>${lb}${Array.isArray(ty)?`<select id="${id}">${ty.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="${id}" autocomplete="off"${ty==='number'?' type="number"':''}${ph?` placeholder="${ph}"`:''}>`}</label>`).join('')}</div></div>`).join('');
 EX.forEach(g=>g[1].forEach(f=>IDS.push(f[0])));
 
 let saveTimer=null;
@@ -1025,13 +1032,6 @@ async function fillCompare(){
 }
 $('cmpA').onchange=fillCompare;$('cmpB').onchange=fillCompare;
 
-async function saveLabs(){
-  const has=LABS.some((_,i)=>S['lab'+i]!=null&&S['lab'+i]!=='');
-  if(!has){$('impmsg').textContent='Сначала введите хотя бы одно значение.';return}
-  await saveQ();
-  $('impmsg').textContent='Сохранено в анкету';
-}
-
 const THEME_BTN=`<button type="button" class="theme-btn" id="themeBtn" title="Сменить тему" aria-label="Сменить тему">
 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 14.3A9 9 0 1 1 9.7 3a7 7 0 0 0 11.3 11.3z"/></svg>
 <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -1184,8 +1184,13 @@ async function init(){
  try{applyTheme(currentTheme())}catch(e){applyTheme('light')}
  IDS.forEach(id=>{
    const e=$(id); if(!e) return;
+   const isTime=(id==='mealWD'||id==='mealWE');
    const handler=()=>{
-     S[id]=e.value;
+     if(isTime){
+       const d=e.value.replace(/\D/g,'').slice(0,4);
+       e.value=d.length>2?d.slice(0,2)+':'+d.slice(2):d;
+       S[id]=/^([01]\d|2[0-3]):[0-5]\d$/.test(e.value)?e.value:'';
+     }else S[id]=e.value;
      autoSave();
      if(['mealWD','mealWE','breathHold','sitStand','stressFreq'].includes(id)) updSelfTests();
      if(['sex','dob','h','w'].includes(id)){updLabs();if($('kbzhu')?.classList.contains('on'))updK();if($('passport')?.classList.contains('on'))passport()}
@@ -1218,7 +1223,6 @@ async function init(){
  });
  buildLabs();
  updSelfTests();
- $('labSave').addEventListener('click',saveLabs);
  document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
    if(b.disabled) return;
    show(b.dataset.t);
