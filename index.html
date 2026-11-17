@@ -750,11 +750,11 @@ function buildPassportDocHtml(){
  const stressTxt=['почти никогда','редко','иногда','часто','очень часто'][sf]||'не указано';
  const pf=proteinSources(S.diet);
  const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов'}[S.sport];
- const block=(title,body)=>`<div style="margin:14px 0 8px;padding-bottom:4px;border-bottom:2px solid #D6336C;font-size:14px;font-weight:700;color:#D6336C">${title}</div><div style="font-size:13px;line-height:1.55;color:#222">${body}</div>`;
+ const block=(title,body)=>`<div class="pdf-block" style="page-break-inside:avoid;break-inside:avoid;margin:0 0 6px"><div style="margin:14px 0 8px;padding-bottom:4px;border-bottom:2px solid #D6336C;font-size:14px;font-weight:700;color:#D6336C">${title}</div><div style="font-size:13px;line-height:1.55;color:#222;font-weight:400">${body}</div></div>`;
  const li=items=>items.length?`<ul style="margin:6px 0;padding-left:18px">${items.map(x=>`<li style="margin:3px 0">${x}</li>`).join('')}</ul>`:'<p style="color:#666">—</p>';
  const M=[['Завтрак',.25],['Обед',.35],['Полдник',.15],['Ужин',.25]];
  const menuRows=M.map(x=>`<tr><td style="padding:4px 6px;border-bottom:1px solid #eee">${x[0]}</td><td style="padding:4px 6px;border-bottom:1px solid #eee">${Math.round(k.kcal*x[1])}</td><td style="padding:4px 6px;border-bottom:1px solid #eee">${Math.round(k.p*x[1])} г</td></tr>`).join('');
- const html=`<div style="font-family:Arial,Helvetica,sans-serif;color:#222;background:#fff;padding:0;margin:0;max-width:700px;box-sizing:border-box;text-align:left">
+ const html=`<div style="font-family:Arial,Helvetica,sans-serif;font-weight:400;color:#222;background:#fff;padding:0;margin:0;max-width:700px;box-sizing:border-box;text-align:left">
   <div style="background:#D6336C;color:#fff;padding:16px 18px;border-radius:10px;margin-bottom:16px">
     <div style="font-size:20px;font-weight:700">Паспорт здоровья${S.name?': '+S.name:''}</div>
     <div style="font-size:12px;opacity:.9;margin-top:4px">Дата: ${todayStr()} · возраст ${a??'—'} · ${m?'мужчина':'женщина'}</div>
@@ -781,7 +781,7 @@ function buildPassportDocHtml(){
   `)}
   ${block('Рекомендации', `
     <p><b>Питание.</b> Тип: ${S.diet||'не указано'}. Источники белка: ${pf}. Вода ~${(k.water/1000).toFixed(1)} л/день.${S.allergy?' Исключить: '+S.allergy+'.':''}</p>
-    <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:12px"><thead><tr><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd">Меню на день</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd">ккал</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd">белок</th></tr></thead><tbody>${menuRows}</tbody></table>
+    <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:12px"><thead><tr><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;color:#666;font-weight:700">Меню на день</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;color:#666;font-weight:700">ккал</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;color:#666;font-weight:700">белок</th></tr></thead><tbody>${menuRows}</tbody></table>
     <p><b>Сон и стресс.</b> ${sc<=2||sf>='3'||n('sleep')<7?'Регулярное время сна ±30 мин, утренний свет, экраны за час до сна, дыхание 6 вдохов/мин перед сном.':'Сохраняйте регулярность сна и режим отдыха.'}</p>
     <p><b>Активность.</b> ${parseFloat(S.act)<=1.2?'Ходьба 30 мин 4 раза в неделю + 2 силовые.':'2–3 силовые и 1–2 кардио в неделю, 7000–10000 шагов/день.'}${tr?' Цель: '+tr+'.':''}</p>
     <p><b>Профилактика.</b> Терапевт и анализы крови — раз в год; стоматолог — 2 раза в год; грипп ежегодно, АДС раз в 10 лет.</p>
@@ -804,7 +804,7 @@ async function downloadPassportPdf(){
    image:{type:'jpeg',quality:0.98},
    html2canvas:{scale:2,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0},
    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-   pagebreak:{mode:['css','legacy'],avoid:['li','tr']}
+   pagebreak:{mode:['css','legacy'],avoid:['.pdf-block','li','tr','p','h3']}
  };
  const done=()=>{if(btn){btn.disabled=false;btn.textContent='Скачать PDF'}};
  html2pdf().set(opt).from(doc.html,'string').save()
