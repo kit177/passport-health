@@ -73,7 +73,10 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
   caret-color:var(--ink);
   transition:background-color 9999s ease-in-out 0s;
 }
-input::placeholder,textarea::placeholder{color:var(--mute);opacity:.6;font-weight:400;font-size:.92em;text-overflow:ellipsis}
+input::placeholder,textarea::placeholder{color:var(--mute)!important;-webkit-text-fill-color:var(--mute)!important;opacity:.6!important;font-weight:400!important;font-size:.92em;text-overflow:ellipsis}
+input:-webkit-autofill::placeholder,input:placeholder-shown:-webkit-autofill{-webkit-text-fill-color:var(--mute)!important;opacity:.6!important;font-weight:400!important}
+input[aria-invalid=true]{border-color:var(--bad)!important}
+input:placeholder-shown{color:var(--mute)!important;-webkit-text-fill-color:var(--mute)!important;font-weight:400!important}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 .btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;transition:transform .18s ease,box-shadow .2s ease,filter .18s ease,background .2s ease}
@@ -296,6 +299,7 @@ textarea{min-height:90px}
 <label>В будни<input id="mealWD" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="например, 08:30"></label>
 <label>В выходные<input id="mealWE" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="например, 10:00"></label>
 </div>
+<div id="timeErr" class="note" role="alert" style="color:var(--bad);margin-top:8px"></div>
 <div id="jetlagOut" class="note" style="margin:8px 0 16px"></div>
 
 <h3>3. Дыхание: задержка на выдохе</h3>
@@ -1187,14 +1191,31 @@ async function init(){
    const isTime=(id==='mealWD'||id==='mealWE');
    const handler=()=>{
      if(isTime){
-       const d=e.value.replace(/\D/g,'').slice(0,4);
+       const raw=e.value.replace(/\D/g,'');let d='';
+       for(const c of raw){
+         if(d.length>=4)break;
+         if(d.length===0&&c>'2')d='0';
+         if(d.length===1&&d[0]==='2'&&c>'3')continue;
+         if(d.length===2&&c>'5')continue;
+         d+=c;
+       }
        e.value=d.length>2?d.slice(0,2)+':'+d.slice(2):d;
        S[id]=/^([01]\d|2[0-3]):[0-5]\d$/.test(e.value)?e.value:'';
+       const bad=e.value!==''&&S[id]==='';
+       e.setAttribute('aria-invalid',bad&&e.value.length===5?'true':'false');
      }else S[id]=e.value;
      autoSave();
      if(['mealWD','mealWE','breathHold','sitStand','stressFreq'].includes(id)) updSelfTests();
      if(['sex','dob','h','w'].includes(id)){updLabs();if($('kbzhu')?.classList.contains('on'))updK();if($('passport')?.classList.contains('on'))passport()}
    };
+   if(isTime)e.addEventListener('blur',()=>{
+     const er=$('timeErr');
+     if(e.value!==''&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(e.value)){
+       e.value='';S[id]='';e.setAttribute('aria-invalid','true');
+       if(er)er.textContent='Введите время целиком, от 00:00 до 23:59, например 08:30.';
+       autoSave();updSelfTests();
+     }else{e.setAttribute('aria-invalid','false');if(er)er.textContent=''}
+   });
    e.addEventListener('input', handler);
    e.addEventListener('change', handler);
  });
