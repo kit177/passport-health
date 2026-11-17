@@ -16,14 +16,14 @@
 <style>
 html.theme-light, :root[data-theme="light"], :root{
   --bg:#FFF3F7;--card:#ffffff;--ink:#150910;--mute:#7C5568;--line:#F5CFDD;
-  --acc:#D6336C;--acc-ink:#ffffff;--acc-soft:#FFE4EE;
+  --acc:#D6336C;--acc-ink:#ffffff;--acc-soft:#FFE4EE;--ph:#B58BA0;
   --ok:#1F7A4D;--okbg:#DDF1E6;--warn:#8A5A00;--warnbg:#FBEBC8;--bad:#A3241B;--badbg:#F9DAD6;
   --shadow:0 4px 24px rgba(214,51,108,.07);--radius:18px;
   color-scheme:only light;
 }
 html.theme-dark, :root[data-theme="dark"]{
   --bg:#110811;--card:#1D1019;--ink:#FFEEF4;--mute:#D3A3B8;--line:#4A2A3A;
-  --acc:#FF8FB8;--acc-ink:#240A15;--acc-soft:#3A1A2A;
+  --acc:#FF8FB8;--acc-ink:#240A15;--acc-soft:#3A1A2A;--ph:#8A6578;
   --ok:#7AD8A3;--okbg:#17372A;--warn:#F0C36A;--warnbg:#3A2E10;--bad:#FF9D94;--badbg:#421D1A;
   --shadow:0 4px 28px rgba(0,0,0,.35);
   color-scheme:only dark;
@@ -73,10 +73,11 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
   caret-color:var(--ink);
   transition:background-color 9999s ease-in-out 0s;
 }
-input::placeholder,textarea::placeholder{color:var(--mute)!important;-webkit-text-fill-color:var(--mute)!important;opacity:.6!important;font-weight:400!important;font-size:.92em;text-overflow:ellipsis}
-input:-webkit-autofill::placeholder,input:placeholder-shown:-webkit-autofill{-webkit-text-fill-color:var(--mute)!important;opacity:.6!important;font-weight:400!important}
+/* единый цвет подсказок во всех полях: сплошной цвет, без opacity, во всех состояниях */
+input::placeholder,textarea::placeholder,input::-webkit-input-placeholder,textarea::-webkit-input-placeholder,input::-moz-placeholder,textarea::-moz-placeholder,
+input:-webkit-autofill::placeholder,input:focus::placeholder,input:hover::placeholder,input:disabled::placeholder,input[type=number]::placeholder,input[type=text]::placeholder,input[type=date]::placeholder{
+  color:var(--ph)!important;-webkit-text-fill-color:var(--ph)!important;opacity:1!important;font-weight:400!important;font-size:.92em;text-overflow:ellipsis;filter:none!important}
 input[aria-invalid=true]{border-color:var(--bad)!important}
-input:placeholder-shown{color:var(--mute)!important;-webkit-text-fill-color:var(--mute)!important;font-weight:400!important}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 .btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;transition:transform .18s ease,box-shadow .2s ease,filter .18s ease,background .2s ease}
