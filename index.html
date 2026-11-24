@@ -260,6 +260,7 @@ textarea{min-height:90px}
 <nav role="tablist" class="no-print" id="tabs">
 <button role="tab" data-t="profile" aria-selected="true">Анкета</button>
 <button role="tab" data-t="labs" aria-selected="false">Анализы</button>
+<button role="tab" data-t="ftests" aria-selected="false">Функциональные тесты</button>
 <button role="tab" data-t="kbzhu" aria-selected="false">Цели и КБЖУ</button>
 <button role="tab" data-t="compare" aria-selected="false">Сравнение</button>
 <button role="tab" data-t="passport" aria-selected="false">Паспорт</button>
@@ -313,37 +314,7 @@ textarea{min-height:90px}
 <label>Время, секунды<input id="sitStand" type="number" min="5" max="60" step="0.1" placeholder="например, 10"></label>
 <div id="sitOut" class="note" style="margin:8px 0 16px"></div>
 
-<h3>5. Силовой тест на 15 секунд</h3>
-<p class="note">Приседания без веса: сделайте как можно больше полных приседаний за 15 секунд (бёдра параллельно полу). Засеките время по таймеру.</p>
-<label>Количество раз<input id="fn15" type="number" min="0" max="40" placeholder="например, 12"></label>
-<div id="fn15Out" class="note" style="margin:8px 0 16px"></div>
-
-<h3>6. Гибкость: наклон сидя</h3>
-<p class="note">Сядьте на пол, ноги вытянуты вперёд, колени не сгибайте. Медленно потянитесь руками к кончикам пальцев ног и задержитесь на 2 секунды.</p>
-<label>Результат<select id="flex">
-<option value="">Не выбрано</option>
-<option value="0">Не достаю до пальцев ног</option>
-<option value="1">Достаю кончиками пальцев</option>
-<option value="2">Достаю ладонями до стоп и дальше</option>
-</select></label>
-<div id="flexOut" class="note" style="margin:8px 0 16px"></div>
-
-<h3>7. Координация: касание носа</h3>
-<p class="note">Встаньте прямо, вытяните руку в сторону. С закрытыми глазами коснитесь указательным пальцем кончика носа. Повторите 10 раз, меняя руку.</p>
-<label>Результат<select id="coord">
-<option value="">Не выбрано</option>
-<option value="0">Точно, без промахов</option>
-<option value="1">1–2 промаха</option>
-<option value="2">3 и более промахов, дрожь или головокружение</option>
-</select></label>
-<div id="coordOut" class="note" style="margin:8px 0 16px"></div>
-
-<h3>8. Выносливость: стойка на одной ноге</h3>
-<p class="note">Встаньте на одну ногу, вторую приподнимите, руки на поясе, глаза открыты. Засеките время до того, как опустите ногу или потеряете равновесие. Проверьте обе ноги и впишите меньший результат.</p>
-<label>Время, секунды<input id="bal1" type="number" min="0" max="120" placeholder="например, 30"></label>
-<div id="balOut" class="note" style="margin:8px 0 16px"></div>
-
-<h3>9. Шкала стресса</h3>
+<h3>5. Шкала стресса</h3>
 <p class="note">За последние 2 недели: чувствовал(а) ли ты, что не можешь контролировать важные вещи в жизни?</p>
 <label>Как часто<select id="stressFreq">
 <option value="">Не выбрано</option>
@@ -382,6 +353,39 @@ textarea{min-height:90px}
 <p class="note no-print" style="margin-bottom:12px">Значения сохраняются в анкету автоматически.</p>
 <div id="labmsg"></div>
 <div class="scroll"><table><thead><tr><th>Показатель</th><th>Система</th><th>Значение</th><th>Ед.</th><th>Норма</th><th>Статус</th></tr></thead><tbody id="labrows"></tbody></table></div>
+</div></section>
+
+<section id="ftests"><div class="card"><h2>Функциональные тесты</h2>
+<p class="sub" style="margin-bottom:14px">Без оборудования. Выполняйте после разминки. Результаты попадают в паспорт здоровья.</p>
+<h3>1. Тест на 15 секунд: наклоны</h3>
+<p class="note">Встаньте, ноги на ширине плеч. Тянитесь правой рукой к левой ноге, затем левой рукой к правой, и так по очереди как можно быстрее. Считайте все касания за 15 секунд. Засеките время по таймеру.</p>
+<label>Количество касаний<input id="fn15" type="number" min="0" max="40" placeholder="например, 12"></label>
+<div id="fn15Out" class="note" style="margin:8px 0 16px"></div>
+
+<h3>2. Гибкость: наклон сидя</h3>
+<p class="note">Сядьте на пол, ноги вытянуты вперёд, колени не сгибайте. Медленно потянитесь руками к кончикам пальцев ног и задержитесь на 2 секунды.</p>
+<label>Результат<select id="flex">
+<option value="">Не выбрано</option>
+<option value="0">Не достаю до пальцев ног</option>
+<option value="1">Достаю кончиками пальцев</option>
+<option value="2">Достаю ладонями до стоп и дальше</option>
+</select></label>
+<div id="flexOut" class="note" style="margin:8px 0 16px"></div>
+
+<h3>3. Координация: касание носа</h3>
+<p class="note">Встаньте прямо, вытяните руку в сторону. С закрытыми глазами коснитесь указательным пальцем кончика носа. Повторите 10 раз, меняя руку.</p>
+<label>Результат<select id="coord">
+<option value="">Не выбрано</option>
+<option value="0">Точно, без промахов</option>
+<option value="1">1–2 промаха</option>
+<option value="2">3 и более промахов, дрожь или головокружение</option>
+</select></label>
+<div id="coordOut" class="note" style="margin:8px 0 16px"></div>
+
+<h3>4. Выносливость: стойка на одной ноге</h3>
+<p class="note">Встаньте на одну ногу, вторую приподнимите, руки на поясе, глаза открыты. Засеките время до того, как опустите ногу или потеряете равновесие. Проверьте обе ноги и впишите меньший результат.</p>
+<label>Время, секунды<input id="bal1" type="number" min="0" max="120" placeholder="например, 30"></label>
+<div id="balOut" class="note" style="margin:8px 0 16px"></div>
 </div></section>
 
 <section id="kbzhu"><div class="card"><h2>Цель</h2><div class="grid">
@@ -600,7 +604,7 @@ const FT_COORD=['точно, без промахов','1–2 промаха','3 
 function ftResults(){
   const out=[];
   const f=parseFloat(S.fn15);
-  if(!isNaN(f)) out.push({n:'Силовой тест: приседания за 15 сек',v:f+' раз',z:f<8?'cr':f<12?'hi':'ok'});
+  if(!isNaN(f)) out.push({n:'Тест на 15 секунд: наклоны рука–нога',v:f+' раз',z:f<8?'cr':f<12?'hi':'ok'});
   if(S.flex!==''&&FT_FLEX[S.flex]!=null) out.push({n:'Гибкость (наклон сидя)',v:FT_FLEX[S.flex],z:S.flex==='0'?'hi':'ok'});
   if(S.coord!==''&&FT_COORD[S.coord]!=null) out.push({n:'Координация (касание носа)',v:FT_COORD[S.coord],z:S.coord==='0'?'ok':S.coord==='1'?'hi':'cr',doc:S.coord==='2'?'рекомендуется провериться у невролога':''});
   const b=parseFloat(S.bal1);
@@ -650,8 +654,8 @@ function updSelfTests(){
   // функциональные тесты
   const f15=parseFloat(S.fn15),f15El=$('fn15Out');
   if(f15El){
-    if(isNaN(f15)) f15El.textContent='Введите количество приседаний за 15 секунд';
-    else if(f15<8) f15El.innerHTML=`<span class="b cr">${f15} раз — ниже ориентира (меньше 8), стоит укрепить ноги</span>`;
+    if(isNaN(f15)) f15El.textContent='Введите количество касаний за 15 секунд';
+    else if(f15<8) f15El.innerHTML=`<span class="b cr">${f15} раз — ниже ориентира (меньше 8), стоит поработать над подвижностью и силой корпуса</span>`;
     else if(f15<12) f15El.innerHTML=`<span class="b hi">${f15} раз — средний результат</span>`;
     else f15El.innerHTML=`<span class="b ok">${f15} раз — хороший результат (ориентир 12 и больше)</span>`;
   }
@@ -946,6 +950,7 @@ function show(t){
  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==t));
  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t==t));
  if(t=='labs')updLabs()
+ if(t=='ftests')updSelfTests();
  if(t=='kbzhu')updK();
  if(t=='passport')passport();
  if(t=='compare')fillCompare();
@@ -1129,7 +1134,7 @@ async function fillCompare(){
  push('Сон, ч',A.sleep,B.sleep,'higher');
  push('Задержка дыхания, сек',A.breathHold,B.breathHold,'higher');
  push('Сесть–встать, сек',A.sitStand,B.sitStand,'lower');
- push('Приседания за 15 сек',A.fn15,B.fn15,'higher');
+ push('Наклоны за 15 сек',A.fn15,B.fn15,'higher');
  push('Стойка на одной ноге, сек',A.bal1,B.bal1,'higher');
 
  const imA=(A.h&&A.w)?(A.w/Math.pow(A.h/100,2)):NaN;
