@@ -361,8 +361,8 @@ textarea{min-height:90px}
 <label>Жир сейчас, %<input id="bf" type="number" min="3" max="60" placeholder="например, 28"></label>
 <label>Жир желаемый, %<input id="tbf" type="number" min="3" max="60" placeholder="например, 22"></label>
 <label>Мышцы, цель<input id="mus" placeholder="например, +2 кг сухой массы"></label>
-<label>Спортивная цель<select id="sport"><option>Не выбрана</option><option>Сила</option><option>Выносливость</option><option>Гибкость</option><option>Восстановление</option></select></label>
-</div></div><div id="kres"></div></section>
+<label>Спортивная цель<select id="sport"><option>Не выбрана</option><option>Сила</option><option>Выносливость</option><option>Гибкость</option><option>Восстановление</option><option>Накачать ягодицы</option><option>Набрать мышечную массу</option><option>Комплексные упражнения (в быту)</option></select></label>
+</div></div><div id="kres"></div><div id="exres"></div></section>
 
 <section id="compare"><div class="card"><h2>Сравнение анкет</h2>
 <div class="grid">
@@ -640,9 +640,20 @@ function markRequired(){
     e.style.boxShadow=empty?'0 0 0 3px rgba(163,36,27,.12)':'';
   });
 }
+const GOAL_EX={
+'Накачать ягодицы':{t:'Комплекс для ягодиц · 2–3 раза в неделю',l:['Ягодичный мостик — 3×15','Приседания (можно с гантелью) — 3×12','Выпады назад — 3×10 на ногу','Румынская тяга с гантелями — 3×12','Отведение ноги назад на четвереньках — 3×15 на ногу','Боковые шаги с резинкой — 3×15 в каждую сторону']},
+'Набрать мышечную массу':{t:'Силовой комплекс на всё тело · 3 раза в неделю',l:['Приседания — 4×8–10','Жим лёжа или отжимания — 4×8–10','Тяга в наклоне или к поясу — 4×8–10','Жим гантелей над головой — 3×10','Румынская тяга — 3×10','Планка — 3×40 сек']},
+'Комплексные упражнения (в быту)':{t:'Комплекс дома, без оборудования · 3 раза в неделю',l:['Приседания — 3×15','Отжимания (от пола или от стола) — 3×10','Ягодичный мостик — 3×15','Выпады — 3×10 на ногу','Планка — 3×30–40 сек','«Птица-собака» — 3×10 на сторону','Подъёмы на носки (икры) — 3×20']}
+};
+function exView(){
+  const e=GOAL_EX[S.sport];
+  if(!e) return '';
+  return `<div class="card"><h2>Упражнения</h2><h3>${e.t}</h3><ul>${e.l.map(x=>`<li>${x}</li>`).join('')}</ul><p class="note">Перед тренировкой — разминка 5–10 минут. Если есть боли или противопоказания, согласуйте нагрузку с врачом.</p></div>`;
+}
 function updK(){
   const k=calc();
   markRequired();
+  if($('exres'))$('exres').innerHTML=exView();
   if(k){
     $('kres').innerHTML=`<div class="card"><h2>Результат</h2>${kview(k)}</div>`;
   } else {
@@ -682,7 +693,7 @@ function passport(){
  const sys={};R.forEach(l=>(sys[l.sys]=sys[l.sys]||[]).push(l));
  const pf=proteinSources(S.diet);
  const M=[['Завтрак',.25],['Обед',.35],['Полдник',.15],['Ужин',.25]];
- const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов'}[S.sport];
+ const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов','Накачать ягодицы':'ягодичные упражнения 2–3 раза в неделю (мостик, выпады, приседания)','Набрать мышечную массу':'силовые на все группы мышц 3 раза в неделю + белок в рационе','Комплексные упражнения (в быту)':'комплексные упражнения на всё тело 3 раза в неделю в домашних условиях'}[S.sport];
  const chk=['Терапевт и анализы крови — раз в год','Стоматолог — 2 раза в год'];
  if(!m&&a>=18)chk.push('Гинеколог — раз в год');if(a>=40)chk.push('ЭКГ и липидограмма — раз в год');
  const psy=sf>='3'||n('sleep')<7||sc<=2;
@@ -749,7 +760,7 @@ function buildPassportDocHtml(){
  const goalTxt={lose:'Снизить вес',maintain:'Удерживать вес',gain:'Набрать вес'}[S.goal]||'Цель не выбрана';
  const stressTxt=['почти никогда','редко','иногда','часто','очень часто'][sf]||'не указано';
  const pf=proteinSources(S.diet);
- const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов'}[S.sport];
+ const tr={'Сила':'силовые 3 раза в неделю','Выносливость':'кардио 3–4 раза в неделю','Гибкость':'растяжка/йога 3 раза в неделю','Восстановление':'лёгкая ходьба, сон 8 часов','Накачать ягодицы':'ягодичные упражнения 2–3 раза в неделю (мостик, выпады, приседания)','Набрать мышечную массу':'силовые на все группы мышц 3 раза в неделю + белок в рационе','Комплексные упражнения (в быту)':'комплексные упражнения на всё тело 3 раза в неделю в домашних условиях'}[S.sport];
  const block=(title,body)=>`<div class="pdf-block" style="page-break-inside:avoid;break-inside:avoid;margin:0 0 6px"><div style="margin:14px 0 8px;padding-bottom:4px;border-bottom:2px solid #D6336C;font-size:14px;font-weight:700;color:#D6336C">${title}</div><div style="font-size:13px;line-height:1.55;color:#222;font-weight:400">${body}</div></div>`;
  const li=items=>items.length?`<ul style="margin:6px 0;padding-left:18px">${items.map(x=>`<li style="margin:3px 0">${x}</li>`).join('')}</ul>`:'<p style="color:#666">—</p>';
  const M=[['Завтрак',.25],['Обед',.35],['Полдник',.15],['Ужин',.25]];
@@ -1207,6 +1218,7 @@ async function init(){
      }else S[id]=e.value;
      autoSave();
      if(['mealWD','mealWE','breathHold','sitStand','stressFreq'].includes(id)) updSelfTests();
+     if(id==='sport'&&$('kbzhu')?.classList.contains('on'))updK();
      if(['sex','dob','h','w'].includes(id)){updLabs();if($('kbzhu')?.classList.contains('on'))updK();if($('passport')?.classList.contains('on'))passport()}
    };
    if(isTime)e.addEventListener('blur',()=>{
