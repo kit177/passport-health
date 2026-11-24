@@ -260,7 +260,6 @@ textarea{min-height:90px}
 <nav role="tablist" class="no-print" id="tabs">
 <button role="tab" data-t="profile" aria-selected="true">Анкета</button>
 <button role="tab" data-t="labs" aria-selected="false">Анализы</button>
-<button role="tab" data-t="ftests" aria-selected="false">Функциональные тесты</button>
 <button role="tab" data-t="kbzhu" aria-selected="false">Цели и КБЖУ</button>
 <button role="tab" data-t="compare" aria-selected="false">Сравнение</button>
 <button role="tab" data-t="passport" aria-selected="false">Паспорт</button>
@@ -327,35 +326,7 @@ textarea{min-height:90px}
 <div id="stressOut" class="note" style="margin:8px 0 0"></div>
 </div>
 
-<div id="restProfile">
-<div class="card"><h2>О вас</h2><div class="grid">
-<label>Имя<input id="name" autocomplete="name" placeholder="например, Анна"></label>
-<label>Пол<select id="sex"><option value="f">Женский</option><option value="m">Мужской</option></select></label>
-<label>Дата рождения<input id="dob" type="date"></label>
-<label>Рост, см<input id="h" type="number" min="100" max="230" placeholder="например, 165"></label>
-<label>Вес, кг<input id="w" type="number" min="30" max="250" step="0.1" placeholder="например, 62.5"></label>
-</div></div>
-
-<div class="card"><h2>Образ жизни</h2><div class="grid">
-<label>Физическая активность<select id="act"><option value="1.2">Сидячий (мало ходьбы, &lt;10 000 шагов)</option><option value="1.375" selected>Базовый: 1–3 тренировки в неделю</option><option value="1.55">3–5 тренировок в неделю по ~1 часу</option><option value="1.725">Активный: 5+ тренировок в неделю</option></select></label>
-<label>Тип питания<select id="diet"><option>Без ограничений</option><option>Вегетарианское</option><option>Веганское</option><option>Кето</option><option>Халяль</option><option>Кошер</option></select></label>
-<label>Аллергии и непереносимости<input id="allergy" placeholder="например, лактоза, глютен, орехи"></label>
-<label>Сон, часов в сутки<input id="sleep" type="number" min="2" max="14" step="0.5" placeholder="например, 7.5"></label>
-<label>Курение<select id="smoke"><option value="0">Нет</option><option value="1">Да</option></select></label>
-</div></div>
-
-<div id="extra"></div>
-</div>
-</section>
-
-<section id="labs"><div class="card"><h2>Проверка анализов</h2>
-<p class="sub">Введите значения — статус появится сразу. Референсы подобраны по полу и возрасту из анкеты.</p>
-<p class="note no-print" style="margin-bottom:12px">Значения сохраняются в анкету автоматически.</p>
-<div id="labmsg"></div>
-<div class="scroll"><table><thead><tr><th>Показатель</th><th>Система</th><th>Значение</th><th>Ед.</th><th>Норма</th><th>Статус</th></tr></thead><tbody id="labrows"></tbody></table></div>
-</div></section>
-
-<section id="ftests"><div class="card"><h2>Функциональные тесты</h2>
+<div class="card" id="ftCard"><h2>Функциональные тесты</h2>
 <p class="sub" style="margin-bottom:14px">Без оборудования. Выполняйте после разминки. Результаты попадают в паспорт здоровья.</p>
 <h3>1. Тест на 15 секунд: наклоны</h3>
 <p class="note">Встаньте, ноги на ширине плеч. Тянитесь правой рукой к левой ноге, затем левой рукой к правой, и так по очереди как можно быстрее. Считайте все касания за 15 секунд. Засеките время по таймеру.</p>
@@ -386,6 +357,34 @@ textarea{min-height:90px}
 <p class="note">Встаньте на одну ногу, вторую приподнимите, руки на поясе, глаза открыты. Засеките время до того, как опустите ногу или потеряете равновесие. Проверьте обе ноги и впишите меньший результат.</p>
 <label>Время, секунды<input id="bal1" type="number" min="0" max="120" placeholder="например, 30"></label>
 <div id="balOut" class="note" style="margin:8px 0 16px"></div>
+</div>
+
+<div id="restProfile">
+<div class="card"><h2>О вас</h2><div class="grid">
+<label>Имя<input id="name" autocomplete="name" placeholder="например, Анна"></label>
+<label>Пол<select id="sex"><option value="f">Женский</option><option value="m">Мужской</option></select></label>
+<label>Дата рождения<input id="dob" type="date"></label>
+<label>Рост, см<input id="h" type="number" min="100" max="230" placeholder="например, 165"></label>
+<label>Вес, кг<input id="w" type="number" min="30" max="250" step="0.1" placeholder="например, 62.5"></label>
+</div></div>
+
+<div class="card"><h2>Образ жизни</h2><div class="grid">
+<label>Физическая активность<select id="act"><option value="1.2">Сидячий (мало ходьбы, &lt;10 000 шагов)</option><option value="1.375" selected>Базовый: 1–3 тренировки в неделю</option><option value="1.55">3–5 тренировок в неделю по ~1 часу</option><option value="1.725">Активный: 5+ тренировок в неделю</option></select></label>
+<label>Тип питания<select id="diet"><option>Без ограничений</option><option>Вегетарианское</option><option>Веганское</option><option>Кето</option><option>Халяль</option><option>Кошер</option></select></label>
+<label>Аллергии и непереносимости<input id="allergy" placeholder="например, лактоза, глютен, орехи"></label>
+<label>Сон, часов в сутки<input id="sleep" type="number" min="2" max="14" step="0.5" placeholder="например, 7.5"></label>
+<label>Курение<select id="smoke"><option value="0">Нет</option><option value="1">Да</option></select></label>
+</div></div>
+
+<div id="extra"></div>
+</div>
+</section>
+
+<section id="labs"><div class="card"><h2>Проверка анализов</h2>
+<p class="sub">Введите значения — статус появится сразу. Референсы подобраны по полу и возрасту из анкеты.</p>
+<p class="note no-print" style="margin-bottom:12px">Значения сохраняются в анкету автоматически.</p>
+<div id="labmsg"></div>
+<div class="scroll"><table><thead><tr><th>Показатель</th><th>Система</th><th>Значение</th><th>Ед.</th><th>Норма</th><th>Статус</th></tr></thead><tbody id="labrows"></tbody></table></div>
 </div></section>
 
 <section id="kbzhu"><div class="card"><h2>Цель</h2><div class="grid">
@@ -950,7 +949,6 @@ function show(t){
  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==t));
  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t==t));
  if(t=='labs')updLabs()
- if(t=='ftests')updSelfTests();
  if(t=='kbzhu')updK();
  if(t=='passport')passport();
  if(t=='compare')fillCompare();
