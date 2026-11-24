@@ -328,7 +328,7 @@ textarea{min-height:90px}
 
 <div class="card" id="ftCard"><h2>Функциональные тесты</h2>
 <p class="sub" style="margin-bottom:14px">Без оборудования. Выполняйте после разминки. Результаты попадают в паспорт здоровья.</p>
-<h3>1. Тест на 15 секунд: наклоны</h3>
+<h3>1. Выносливость: наклоны за 15 секунд</h3>
 <p class="note">Встаньте, ноги на ширине плеч. Тянитесь правой рукой к левой ноге, затем левой рукой к правой, и так по очереди как можно быстрее. Считайте все касания за 15 секунд. Засеките время по таймеру.</p>
 <label>Количество касаний<input id="fn15" type="number" min="0" max="40" placeholder="например, 12"></label>
 <div id="fn15Out" class="note" style="margin:8px 0 16px"></div>
@@ -353,7 +353,7 @@ textarea{min-height:90px}
 </select></label>
 <div id="coordOut" class="note" style="margin:8px 0 16px"></div>
 
-<h3>4. Выносливость: стойка на одной ноге</h3>
+<h3>4. Равновесие: стойка на одной ноге</h3>
 <p class="note">Встаньте на одну ногу, вторую приподнимите, руки на поясе, глаза открыты. Засеките время до того, как опустите ногу или потеряете равновесие. Проверьте обе ноги и впишите меньший результат.</p>
 <label>Время, секунды<input id="bal1" type="number" min="0" max="120" placeholder="например, 30"></label>
 <div id="balOut" class="note" style="margin:8px 0 16px"></div>
@@ -407,6 +407,11 @@ textarea{min-height:90px}
 <p><b>4. Калипер или DEXA.</b> Калипер измеряет складки кожи (нужен опыт). DEXA в клинике даёт самый точный результат.</p>
 <p><b>Ориентиры для взрослых:</b> женщины: спортивный уровень 14–20%, фитнес 21–24%, средний 25–31%, ожирение от 32%. Мужчины: спортивный уровень 6–13%, фитнес 14–17%, средний 18–24%, ожирение от 25%.</p>
 <p>Любой способ даёт приблизительный результат. Лучше всего выбрать один метод и смотреть на изменения раз в 2–4 недели.</p>
+<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line,#ccc)">
+<p><b>Рассчитать здесь.</b> Данные берутся из анкеты: пол, дата рождения, рост, вес, талия, бёдра (для женщин) и шея (поле «Размеры тела»).</p>
+<button class="btn small" type="button" id="fatBtn">Рассчитать % жира</button>
+<div id="fatOut" style="margin-top:10px"></div>
+</div>
 </div></details>
 </div><div id="kres"></div><div id="exres"></div></section>
 
@@ -600,14 +605,53 @@ function jetlagHours(){
 }
 const FT_FLEX=['не достаю до пальцев ног','достаю кончиками пальцев','достаю ладонями до стоп и дальше'];
 const FT_COORD=['точно, без промахов','1–2 промаха','3 и более промахов, дрожь или головокружение'];
+function fatCalc(){
+  const out=$('fatOut');if(!out)return;
+  const m=S.sex=='m',h=val('h'),w=val('w'),wa=val('waist'),hp=val('hips'),nk=val('neck'),a=age();
+  const res=[],miss=[];
+  // метод ВМС США
+  const needNavy=[];
+  if(!h)needNavy.push('рост');if(!wa)needNavy.push('талия');if(!nk)needNavy.push('шея');if(!m&&!hp)needNavy.push('бёдра');
+  let navy=null;
+  if(!needNavy.length){
+    const d=m?(wa-nk):(wa+hp-nk);
+    if(d>0){navy=m?495/(1.0324-0.19077*Math.log10(d)+0.15456*Math.log10(h))-450:495/(1.29579-0.35004*Math.log10(d)+0.22100*Math.log10(h))-450}
+  }
+  if(navy!=null&&isFinite(navy)&&navy>2&&navy<60) res.push(['По обхватам (метод ВМС США)',navy]);
+  else miss.push('для метода по обхватам не хватает: '+(needNavy.length?needNavy.join(', '):'проверьте значения обхватов'));
+  // формула Дейренберга
+  let dei=null;
+  if(w&&h&&a!=null&&a>=18){const bmi=w/Math.pow(h/100,2);dei=1.2*bmi+0.23*a-10.8*(m?1:0)-5.4}
+  if(dei!=null&&dei>2&&dei<60) res.push(['По ИМТ (формула Дейренберга, грубая)',dei]);
+  else miss.push('для формулы по ИМТ нужны дата рождения (от 18 лет), рост и вес');
+  if(!res.length){out.innerHTML='<div class="msg">Заполните в анкете: '+miss.join('; ')+'.</div>';return}
+  const main=res[0][1];
+  out.innerHTML='<ul>'+res.map(r=>'<li>'+r[0]+': <b>'+r[1].toFixed(1)+'%</b></li>').join('')+'</ul>'
+   +(miss.length?'<p class="note">'+miss.join('; ')+'.</p>':'')
+   +'<p class="note">Это приблизительная оценка, ошибка бывает 3–5%.</p>'
+   +'<button class="btn small sec" type="button" id="fatApply">Подставить '+main.toFixed(1)+'% в поле «Жир сейчас»</button>';
+  const ap=$('fatApply');
+  if(ap)ap.onclick=()=>{const e=$('bf');if(e){e.value=main.toFixed(1);e.dispatchEvent(new Event('input',{bubbles:true}))}};
+}
+function ftNorm(){
+  const a=age(),x=a==null?30:a;
+  let end,bal,band;
+  if(x<30){end=[9,14];bal=[20,40];band='до 30 лет'}
+  else if(x<40){end=[8,13];bal=[20,40];band='30–39 лет'}
+  else if(x<50){end=[8,12];bal=[18,35];band='40–49 лет'}
+  else if(x<60){end=[6,10];bal=[18,35];band='50–59 лет'}
+  else if(x<70){end=[5,8];bal=[12,25];band='60–69 лет'}
+  else{end=[3,6];bal=[7,15];band='70 лет и старше'}
+  return{end,bal,band,known:a!=null};
+}
 function ftResults(){
-  const out=[];
+  const out=[],N=ftNorm();
   const f=parseFloat(S.fn15);
-  if(!isNaN(f)) out.push({n:'Тест на 15 секунд: наклоны рука–нога',v:f+' раз',z:f<8?'cr':f<12?'hi':'ok'});
+  if(!isNaN(f)) out.push({n:'Выносливость (наклоны за 15 сек)',v:f+' раз',z:f<N.end[0]?'cr':f<N.end[1]?'hi':'ok'});
   if(S.flex!==''&&FT_FLEX[S.flex]!=null) out.push({n:'Гибкость (наклон сидя)',v:FT_FLEX[S.flex],z:S.flex==='0'?'hi':'ok'});
   if(S.coord!==''&&FT_COORD[S.coord]!=null) out.push({n:'Координация (касание носа)',v:FT_COORD[S.coord],z:S.coord==='0'?'ok':S.coord==='1'?'hi':'cr',doc:S.coord==='2'?'рекомендуется провериться у невролога':''});
   const b=parseFloat(S.bal1);
-  if(!isNaN(b)) out.push({n:'Выносливость (стойка на одной ноге)',v:b+' сек',z:b<15?'cr':b<30?'hi':'ok'});
+  if(!isNaN(b)) out.push({n:'Равновесие (стойка на одной ноге)',v:b+' сек',z:b<N.bal[0]?'cr':b<N.bal[1]?'hi':'ok'});
   return out;
 }
 function updSelfTests(){
@@ -651,12 +695,13 @@ function updSelfTests(){
     else ssEl.innerHTML=`<span class="b ok">${ss} сек — норма</span>`;
   }
   // функциональные тесты
+  const NF=ftNorm(),ageTxt=NF.known?`ориентир для возраста ${NF.band}`:'ориентир для возраста до 30 лет, укажите дату рождения для точной оценки';
   const f15=parseFloat(S.fn15),f15El=$('fn15Out');
   if(f15El){
     if(isNaN(f15)) f15El.textContent='Введите количество касаний за 15 секунд';
-    else if(f15<8) f15El.innerHTML=`<span class="b cr">${f15} раз — ниже ориентира (меньше 8), стоит поработать над подвижностью и силой корпуса</span>`;
-    else if(f15<12) f15El.innerHTML=`<span class="b hi">${f15} раз — средний результат</span>`;
-    else f15El.innerHTML=`<span class="b ok">${f15} раз — хороший результат (ориентир 12 и больше)</span>`;
+    else if(f15<NF.end[0]) f15El.innerHTML=`<span class="b cr">${f15} раз — низкая выносливость, ниже ориентира (${NF.end[0]})</span> <span class="note">${ageTxt}</span>`;
+    else if(f15<NF.end[1]) f15El.innerHTML=`<span class="b hi">${f15} раз — средний результат</span> <span class="note">${ageTxt}: хорошо от ${NF.end[1]}</span>`;
+    else f15El.innerHTML=`<span class="b ok">${f15} раз — хороший результат</span> <span class="note">${ageTxt}: хорошо от ${NF.end[1]}</span>`;
   }
   const fxEl=$('flexOut');
   if(fxEl){
@@ -674,9 +719,9 @@ function updSelfTests(){
   const bl=parseFloat(S.bal1),blEl=$('balOut');
   if(blEl){
     if(isNaN(bl)) blEl.textContent='Введите время в секундах';
-    else if(bl<15) blEl.innerHTML=`<span class="b cr">${bl} сек — низкий результат, слабые мышцы ног и кора, риск падений</span>`;
-    else if(bl<30) blEl.innerHTML=`<span class="b hi">${bl} сек — средний результат</span>`;
-    else blEl.innerHTML=`<span class="b ok">${bl} сек — хороший результат (ориентир 30 сек и больше)</span>`;
+    else if(bl<NF.bal[0]) blEl.innerHTML=`<span class="b cr">${bl} сек — низкое равновесие, слабые мышцы ног и кора, риск падений</span> <span class="note">${ageTxt}: хорошо от ${NF.bal[1]} сек</span>`;
+    else if(bl<NF.bal[1]) blEl.innerHTML=`<span class="b hi">${bl} сек — средний результат</span> <span class="note">${ageTxt}: хорошо от ${NF.bal[1]} сек</span>`;
+    else blEl.innerHTML=`<span class="b ok">${bl} сек — хороший результат</span> <span class="note">${ageTxt}: хорошо от ${NF.bal[1]} сек</span>`;
   }
   // stress
   const sf=S.stressFreq;
@@ -724,7 +769,10 @@ function calc(){
   else note='Желаемый вес не совпадает с целью — считаем поддержание.';}
  let kcal=tdee+delta;const floor=m?1500:1200;
  if(kcal<floor){kcal=floor;note='Калорийность не ниже '+floor+' ккал.'}
- const p=w*(goal=='lose'?2.0:goal=='gain'?1.8:1.7),f=Math.max(w*0.8,w*0.9),c=Math.max(0,(kcal-p*4-f*9)/4);
+ const SPORT_P={'Сила':1.8,'Набрать мышечную массу':2.0,'Накачать ягодицы':1.8,'Накачать ноги':1.8,'Накачать пресс':1.8,'Подтянуть руки и плечи':1.8,'Подтянуть всё тело и сжечь жир':2.0};
+ const pk0=goal=='lose'?2.0:goal=='gain'?1.8:1.7,pk=Math.max(pk0,SPORT_P[S.sport]||0);
+ if(pk>pk0)note=(note?note+' ':'')+'Белок увеличен до '+pk+' г на кг веса под цель «'+S.sport+'».';
+ const p=w*pk,f=Math.max(w*0.8,w*0.9),c=Math.max(0,(kcal-p*4-f*9)/4);
  return{bmr,tdee,kcal,p,f,c,water:w*30,bmi:w/Math.pow(h/100,2),delta:kcal-tdee,note}}
 function kview(k){
  const pc=Math.round(k.p*4/k.kcal*100),fc=Math.round(k.f*9/k.kcal*100),cc=100-pc-fc;
@@ -974,6 +1022,7 @@ const EX=[
   ['Размеры тела',[
     ['waist','Талия, см','number','например, 72'],
     ['hips','Бёдра, см','number','например, 98'],
+    ['neck','Шея, см','number','например, 34'],
     ['chest','Грудь, см','number','например, 90']
   ]],
   ['Окружение',[
@@ -984,6 +1033,7 @@ const EX=[
 ];
 $('extra').innerHTML=EX.map(([t,fs])=>`<div class="card"><h2>${t}</h2><div class="grid">${fs.map(([id,lb,ty,ph])=>`<label>${lb}${Array.isArray(ty)?`<select id="${id}">${ty.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="${id}" autocomplete="off"${ty==='number'?' type="number"':''}${ph?` placeholder="${ph}"`:''}>`}</label>`).join('')}</div></div>`).join('');
 EX.forEach(g=>g[1].forEach(f=>IDS.push(f[0])));
+const fatBtn=$('fatBtn');if(fatBtn)fatBtn.onclick=fatCalc;
 
 let saveTimer=null;
 function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveQ,700)}
@@ -1132,8 +1182,10 @@ async function fillCompare(){
  push('Сон, ч',A.sleep,B.sleep,'higher');
  push('Задержка дыхания, сек',A.breathHold,B.breathHold,'higher');
  push('Сесть–встать, сек',A.sitStand,B.sitStand,'lower');
- push('Наклоны за 15 сек',A.fn15,B.fn15,'higher');
- push('Стойка на одной ноге, сек',A.bal1,B.bal1,'higher');
+ push('Выносливость: наклоны за 15 сек',A.fn15,B.fn15,'higher');
+ push('Равновесие: стойка на одной ноге, сек',A.bal1,B.bal1,'higher');
+ push('Гибкость (0 — не достаю до пальцев, 1 — кончики пальцев, 2 — ладони до стоп)',A.flex,B.flex,'higher');
+ push('Координация (0 — без промахов, 1 — 1–2 промаха, 2 — 3 и более)',A.coord,B.coord,'lower');
 
  const imA=(A.h&&A.w)?(A.w/Math.pow(A.h/100,2)):NaN;
  const imB=(B.h&&B.w)?(B.w/Math.pow(B.h/100,2)):NaN;
@@ -1333,6 +1385,7 @@ async function init(){
      autoSave();
      if(['mealWD','mealWE','breathHold','sitStand','fn15','flex','coord','bal1','stressFreq'].includes(id)) updSelfTests();
      if(id==='sport'&&$('kbzhu')?.classList.contains('on'))updK();
+     if(id==='dob')updSelfTests();
      if(['sex','dob','h','w'].includes(id)){updLabs();if($('kbzhu')?.classList.contains('on'))updK();if($('passport')?.classList.contains('on'))passport()}
    };
    if(isTime)e.addEventListener('blur',()=>{
