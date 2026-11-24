@@ -328,7 +328,7 @@ textarea{min-height:90px}
 
 <div class="card" id="ftCard"><h2>Функциональные тесты</h2>
 <p class="sub" style="margin-bottom:14px">Без оборудования. Выполняйте после разминки. Результаты попадают в паспорт здоровья.</p>
-<h3>1. Выносливость: наклоны</h3>
+<h3>1. Выносливость: наклоны за 15 секунд</h3>
 <p class="note">Встаньте, ноги на ширине плеч. Тянитесь правой рукой к левой ноге, затем левой рукой к правой, и так по очереди как можно быстрее. Считайте все касания за 15 секунд. Засеките время по таймеру.</p>
 <label>Количество касаний<input id="fn15" type="number" min="0" max="40" placeholder="например, 12"></label>
 <div id="fn15Out" class="note" style="margin:8px 0 16px"></div>
@@ -609,11 +609,11 @@ function ftNorm(){
 function ftResults(){
   const out=[],N=ftNorm();
   const f=parseFloat(S.fn15);
-  if(!isNaN(f)) out.push({n:'Выносливость (наклоны за 15 сек)',v:f+' раз',z:f<N.end[0]?'cr':f<N.end[1]?'hi':'ok'});
-  if(S.flex!==''&&FT_FLEX[S.flex]!=null) out.push({n:'Гибкость (наклон сидя)',v:FT_FLEX[S.flex],z:S.flex==='0'?'hi':'ok'});
-  if(S.coord!==''&&FT_COORD[S.coord]!=null) out.push({n:'Координация (касание носа)',v:FT_COORD[S.coord],z:S.coord==='0'?'ok':S.coord==='1'?'hi':'cr',doc:S.coord==='2'?'рекомендуется провериться у невролога':''});
+  if(!isNaN(f)) out.push({n:'Выносливость',v:f+' раз',z:f<N.end[0]?'cr':f<N.end[1]?'hi':'ok'});
+  if(S.flex!==''&&FT_FLEX[S.flex]!=null) out.push({n:'Гибкость',v:FT_FLEX[S.flex],z:S.flex==='0'?'hi':'ok'});
+  if(S.coord!==''&&FT_COORD[S.coord]!=null) out.push({n:'Координация',v:FT_COORD[S.coord],z:S.coord==='0'?'ok':S.coord==='1'?'hi':'cr',doc:S.coord==='2'?'рекомендуется провериться у невролога':''});
   const b=parseFloat(S.bal1);
-  if(!isNaN(b)) out.push({n:'Равновесие (стойка на одной ноге)',v:b+' сек',z:b<N.bal[0]?'cr':b<N.bal[1]?'hi':'ok'});
+  if(!isNaN(b)) out.push({n:'Равновесие',v:b+' сек',z:b<N.bal[0]?'cr':b<N.bal[1]?'hi':'ok'});
   return out;
 }
 function updSelfTests(){
