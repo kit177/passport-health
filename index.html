@@ -313,7 +313,37 @@ textarea{min-height:90px}
 <label>Время, секунды<input id="sitStand" type="number" min="5" max="60" step="0.1" placeholder="например, 10"></label>
 <div id="sitOut" class="note" style="margin:8px 0 16px"></div>
 
-<h3>5. Шкала стресса</h3>
+<h3>5. Силовой тест на 15 секунд</h3>
+<p class="note">Приседания без веса: сделайте как можно больше полных приседаний за 15 секунд (бёдра параллельно полу). Засеките время по таймеру.</p>
+<label>Количество раз<input id="fn15" type="number" min="0" max="40" placeholder="например, 12"></label>
+<div id="fn15Out" class="note" style="margin:8px 0 16px"></div>
+
+<h3>6. Гибкость: наклон сидя</h3>
+<p class="note">Сядьте на пол, ноги вытянуты вперёд, колени не сгибайте. Медленно потянитесь руками к кончикам пальцев ног и задержитесь на 2 секунды.</p>
+<label>Результат<select id="flex">
+<option value="">Не выбрано</option>
+<option value="0">Не достаю до пальцев ног</option>
+<option value="1">Достаю кончиками пальцев</option>
+<option value="2">Достаю ладонями до стоп и дальше</option>
+</select></label>
+<div id="flexOut" class="note" style="margin:8px 0 16px"></div>
+
+<h3>7. Координация: касание носа</h3>
+<p class="note">Встаньте прямо, вытяните руку в сторону. С закрытыми глазами коснитесь указательным пальцем кончика носа. Повторите 10 раз, меняя руку.</p>
+<label>Результат<select id="coord">
+<option value="">Не выбрано</option>
+<option value="0">Точно, без промахов</option>
+<option value="1">1–2 промаха</option>
+<option value="2">3 и более промахов, дрожь или головокружение</option>
+</select></label>
+<div id="coordOut" class="note" style="margin:8px 0 16px"></div>
+
+<h3>8. Выносливость: стойка на одной ноге</h3>
+<p class="note">Встаньте на одну ногу, вторую приподнимите, руки на поясе, глаза открыты. Засеките время до того, как опустите ногу или потеряете равновесие. Проверьте обе ноги и впишите меньший результат.</p>
+<label>Время, секунды<input id="bal1" type="number" min="0" max="120" placeholder="например, 30"></label>
+<div id="balOut" class="note" style="margin:8px 0 16px"></div>
+
+<h3>9. Шкала стресса</h3>
 <p class="note">За последние 2 недели: чувствовал(а) ли ты, что не можешь контролировать важные вещи в жизни?</p>
 <label>Как часто<select id="stressFreq">
 <option value="">Не выбрано</option>
@@ -442,7 +472,7 @@ const SUPABASE_KEY='sb_publishable_dB8RMTeJucQ2jqN6Ub3MIA_b9MRvARN';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const $=id=>document.getElementById(id);
-const IDS=['name','sex','dob','h','w','waist','act','diet','allergy','sleep','smoke','goal','tw','weeks','bf','tbf','mus','sport','mealWD','mealWE','breathHold','sitStand','stressFreq','sleep1','sleep2','sleep3','sleep4','sleep5'];
+const IDS=['name','sex','dob','h','w','waist','act','diet','allergy','sleep','smoke','goal','tw','weeks','bf','tbf','mus','sport','mealWD','mealWE','breathHold','sitStand','fn15','flex','coord','bal1','stressFreq','sleep1','sleep2','sleep3','sleep4','sleep5'];
 const LABS=[
 {n:'Гемоглобин',u:'г/л',r:(s,a)=>a<18?[115,150]:s=='m'?[130,160]:[120,150]},
 {n:'Глюкоза натощак',u:'ммоль/л',r:()=>[3.9,5.9]},
@@ -565,6 +595,18 @@ function jetlagHours(){
   if(d>12) d=24-d;
   return d;
 }
+const FT_FLEX=['не достаю до пальцев ног','достаю кончиками пальцев','достаю ладонями до стоп и дальше'];
+const FT_COORD=['точно, без промахов','1–2 промаха','3 и более промахов, дрожь или головокружение'];
+function ftResults(){
+  const out=[];
+  const f=parseFloat(S.fn15);
+  if(!isNaN(f)) out.push({n:'Силовой тест: приседания за 15 сек',v:f+' раз',z:f<8?'cr':f<12?'hi':'ok'});
+  if(S.flex!==''&&FT_FLEX[S.flex]!=null) out.push({n:'Гибкость (наклон сидя)',v:FT_FLEX[S.flex],z:S.flex==='0'?'hi':'ok'});
+  if(S.coord!==''&&FT_COORD[S.coord]!=null) out.push({n:'Координация (касание носа)',v:FT_COORD[S.coord],z:S.coord==='0'?'ok':S.coord==='1'?'hi':'cr',doc:S.coord==='2'?'рекомендуется провериться у невролога':''});
+  const b=parseFloat(S.bal1);
+  if(!isNaN(b)) out.push({n:'Выносливость (стойка на одной ноге)',v:b+' сек',z:b<15?'cr':b<30?'hi':'ok'});
+  return out;
+}
 function updSelfTests(){
   syncYnButtons();
   // sleep
@@ -604,6 +646,34 @@ function updSelfTests(){
     if(isNaN(ss)) ssEl.textContent='Введите время в секундах';
     else if(ss>12) ssEl.innerHTML=`<span class="b cr">${ss} сек — слабость нижних конечностей, повышенный риск метаболических нарушений</span>`;
     else ssEl.innerHTML=`<span class="b ok">${ss} сек — норма</span>`;
+  }
+  // функциональные тесты
+  const f15=parseFloat(S.fn15),f15El=$('fn15Out');
+  if(f15El){
+    if(isNaN(f15)) f15El.textContent='Введите количество приседаний за 15 секунд';
+    else if(f15<8) f15El.innerHTML=`<span class="b cr">${f15} раз — ниже ориентира (меньше 8), стоит укрепить ноги</span>`;
+    else if(f15<12) f15El.innerHTML=`<span class="b hi">${f15} раз — средний результат</span>`;
+    else f15El.innerHTML=`<span class="b ok">${f15} раз — хороший результат (ориентир 12 и больше)</span>`;
+  }
+  const fxEl=$('flexOut');
+  if(fxEl){
+    if(S.flex===''||S.flex==null) fxEl.textContent='Выберите результат';
+    else if(S.flex==='0') fxEl.innerHTML='<span class="b hi">Гибкость ниже нормы — полезна ежедневная растяжка задней поверхности бедра и спины</span>';
+    else fxEl.innerHTML='<span class="b ok">Гибкость в норме</span>';
+  }
+  const crEl=$('coordOut');
+  if(crEl){
+    if(S.coord===''||S.coord==null) crEl.textContent='Выберите результат';
+    else if(S.coord==='0') crEl.innerHTML='<span class="b ok">Координация в норме</span>';
+    else if(S.coord==='1') crEl.innerHTML='<span class="b hi">Небольшие неточности — повторите тест отдохнувшим</span>';
+    else crEl.innerHTML='<span class="b cr">Координация снижена — рекомендуется провериться у невролога</span>';
+  }
+  const bl=parseFloat(S.bal1),blEl=$('balOut');
+  if(blEl){
+    if(isNaN(bl)) blEl.textContent='Введите время в секундах';
+    else if(bl<15) blEl.innerHTML=`<span class="b cr">${bl} сек — низкий результат, слабые мышцы ног и кора, риск падений</span>`;
+    else if(bl<30) blEl.innerHTML=`<span class="b hi">${bl} сек — средний результат</span>`;
+    else blEl.innerHTML=`<span class="b ok">${bl} сек — хороший результат (ориентир 30 сек и больше)</span>`;
   }
   // stress
   const sf=S.stressFreq;
@@ -721,6 +791,7 @@ function passport(){
  if(!isNaN(bh)&&bh<20)risks.push('Низкая толерантность к CO₂ (задержка дыхания <20 сек)');
  if(!isNaN(ss)&&ss>12)risks.push('Слабость нижних конечностей (тест сесть-встать >12 сек)');
  if(sf>='3')risks.push('Высокая стресс-нагрузка');
+ ftResults().filter(r=>r.z=='cr').forEach(r=>risks.push('Низкий результат теста: '+r.n));
  if(S.support=='Нет')risks.push('Нет поддержки близких');if(parseFloat(S.act)<=1.2)risks.push('Низкая активность');
  if(S.chronic)risks.push('Хронические заболевания: '+S.chronic);
  const bmiT=k.bmi<18.5?'ниже нормы':k.bmi<25?'норма':k.bmi<30?'избыток массы':'ожирение';
@@ -746,6 +817,7 @@ function passport(){
  <li>Задержка дыхания: ${isNaN(bh)?'не измерен':`<span class="b ${breathZ}">${bh} сек</span>`}</li>
  <li>Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':`<span class="b ${sitZ}">${ss} сек</span>`}</li>
  <li>Стресс: ${sf===''||sf==null?'не измерен':`<span class="b ${stressZ}">${['почти никогда','редко','иногда','часто','очень часто'][sf]||sf}</span>`}</li>
+ ${ftResults().map(r=>`<li>${r.n}: <span class="b ${r.z}">${r.v}</span>${r.doc?' — '+r.doc:''}</li>`).join('')}
  </ul>
  <h3>Анализы</h3>${R.length?`<ul>${R.map(l=>`<li>${l.n}: ${l.v} ${l.u} <span class="b ${l.st}">${LBL[l.st]}</span></li>`).join('')}</ul>`:'<p class="note">Анализы не введены.</p>'}
  ${bad.some(l=>l.st=='cr')?'<div class="msg">Есть критические отклонения — консультация врача.</div>':''}
@@ -788,6 +860,7 @@ function buildPassportDocHtml(){
  if(!isNaN(bh)&&bh<20)risks.push('Низкая толерантность к CO₂');
  if(!isNaN(ss)&&ss>12)risks.push('Слабость нижних конечностей');
  if(sf>='3')risks.push('Высокая стресс-нагрузка');
+ ftResults().filter(r=>r.z=='cr').forEach(r=>risks.push('Низкий результат теста: '+r.n));
  if(S.support=='Нет')risks.push('Нет поддержки близких');if(parseFloat(S.act)<=1.2)risks.push('Низкая активность');
  if(S.chronic)risks.push('Хронические заболевания: '+S.chronic);
  const bmiT=k.bmi<18.5?'ниже нормы':k.bmi<25?'норма':k.bmi<30?'избыток массы':'ожирение';
@@ -814,7 +887,8 @@ function buildPassportDocHtml(){
     `Пищевой джетлаг: ${jh==null?'не измерен':jh.toFixed(1)+' ч'+(jh>2?' — есть джетлаг':' — норма')}`,
     `Задержка дыхания: ${isNaN(bh)?'не измерен':bh+' сек'}`,
     `Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':ss+' сек'}`,
-    `Стресс: ${stressTxt}`
+    `Стресс: ${stressTxt}`,
+    ...ftResults().map(r=>`${r.n}: ${r.v}${r.doc?' — '+r.doc:''}`)
   ]))}
   ${block('Анализы', R.length?li(R.map(l=>`${l.n}: ${l.v} ${l.u} — ${LBL[l.st]||l.st}`)):'<p style="color:#666">Анализы не введены.</p>')}
   ${block('Системы организма', R.length?li(groupLabs(R).map(([q,ls])=>{const o=ls.filter(l=>l.st!='ok');return`<b>${q}:</b> ${o.length?'отклонения — '+o.map(l=>l.n).join(', ')+'. '+docNote(q,ls):'в норме'}`})):'<p style="color:#666">Появятся после ввода анализов.</p>')}
@@ -1055,6 +1129,8 @@ async function fillCompare(){
  push('Сон, ч',A.sleep,B.sleep,'higher');
  push('Задержка дыхания, сек',A.breathHold,B.breathHold,'higher');
  push('Сесть–встать, сек',A.sitStand,B.sitStand,'lower');
+ push('Приседания за 15 сек',A.fn15,B.fn15,'higher');
+ push('Стойка на одной ноге, сек',A.bal1,B.bal1,'higher');
 
  const imA=(A.h&&A.w)?(A.w/Math.pow(A.h/100,2)):NaN;
  const imB=(B.h&&B.w)?(B.w/Math.pow(B.h/100,2)):NaN;
@@ -1252,7 +1328,7 @@ async function init(){
        e.setAttribute('aria-invalid',bad&&e.value.length===5?'true':'false');
      }else S[id]=e.value;
      autoSave();
-     if(['mealWD','mealWE','breathHold','sitStand','stressFreq'].includes(id)) updSelfTests();
+     if(['mealWD','mealWE','breathHold','sitStand','fn15','flex','coord','bal1','stressFreq'].includes(id)) updSelfTests();
      if(id==='sport'&&$('kbzhu')?.classList.contains('on'))updK();
      if(['sex','dob','h','w'].includes(id)){updLabs();if($('kbzhu')?.classList.contains('on'))updK();if($('passport')?.classList.contains('on'))passport()}
    };
