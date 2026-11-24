@@ -471,6 +471,19 @@ const LAB_SYS={'Гемоглобин':'Кроветворная система',
 'Лейкоциты':'Иммунная система','СОЭ':'Иммунная система',
 'Креатинин':'Почки и мочевыделительная система'};
 LABS.forEach(l=>{l.sys=LAB_SYS[l.n]||'Прочее'});
+const SYS_DOC={'Кроветворная система':'терапевт, при необходимости гематолог',
+'Обмен веществ и эндокринная система':'эндокринолог',
+'Сердечно-сосудистая система':'терапевт или кардиолог',
+'Костная система':'терапевт или эндокринолог',
+'Печень и желчевыводящие пути':'гастроэнтеролог или терапевт',
+'Иммунная система':'терапевт, при необходимости иммунолог',
+'Почки и мочевыделительная система':'нефролог или терапевт'};
+function docNote(sy,arr){
+  const bad=arr.filter(l=>l.st!='ok');
+  if(!bad.length) return '';
+  const crit=bad.some(l=>l.st=='cr');
+  return (crit?'Рекомендуется срочно обратиться к врачу: ':'Рекомендуется провериться и обратиться к врачу: ')+(SYS_DOC[sy]||'терапевт')+'.';
+}
 function groupLabs(R){const g={};R.forEach(l=>{(g[l.sys]=g[l.sys]||[]).push(l)});return Object.entries(g)}
 
 const SY={'Кроветворная':['Гемоглобин','Тромбоциты','Ферритин','Железо','Витамин B12'],'Иммунная и костная':['Лейкоциты','СОЭ','Витамин D (25-OH)','Кальций'],'Эндокринная':['Глюкоза натощак','ТТГ'],'Сердечно-сосудистая':['Холестерин общий','ЛПНП','ЛПВП','Триглицериды'],'Печень и почки':['АЛТ','Билирубин общий','Креатинин']};
@@ -744,7 +757,7 @@ function passport(){
  <li>Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':`<span class="b ${sitZ}">${ss} сек</span>`}</li>
  <li>Стресс: ${sf===''||sf==null?'не измерен':`<span class="b ${stressZ}">${['почти никогда','редко','иногда','часто','очень часто'][sf]||sf}</span>`}</li>
  </ul>
- <h3>Системы организма</h3>${R.length?groupLabs(R).map(([sy,arr])=>`<p><b>${sy}</b></p><ul>${arr.map(l=>`<li>${l.n}: ${l.v} ${l.u} <span class="b ${l.st}">${LBL[l.st]}</span></li>`).join('')}</ul>`).join(''):'<p class="note">Анализы не введены.</p>'}
+ <h3>Системы организма</h3>${R.length?groupLabs(R).map(([sy,arr])=>`<p><b>${sy}</b></p><ul>${arr.map(l=>`<li>${l.n}: ${l.v} ${l.u} <span class="b ${l.st}">${LBL[l.st]}</span></li>`).join('')}</ul>${docNote(sy,arr)?`<p class="note">${docNote(sy,arr)}</p>`:''}`).join(''):'<p class="note">Анализы не введены.</p>'}
  ${bad.some(l=>l.st=='cr')?'<div class="msg">Есть критические отклонения — консультация врача.</div>':''}
  <h3>Системы организма</h3>${Object.keys(sys).length?`<ul>${Object.entries(sys).map(([q,ls])=>{const o=ls.filter(l=>l.st!='ok');return`<li><b>${q}:</b> ${o.length?'отклонения — '+o.map(l=>l.n).join(', '):'в норме'}</li>`}).join('')}</ul>`:'<p class="note">Появятся после ввода анализов.</p>'}
  <h3>Факторы риска</h3>${risks.length?`<ul>${risks.map(r=>`<li>${r}</li>`).join('')}</ul>`:'<p class="note">Значимых факторов не выявлено.</p>'}
@@ -813,7 +826,7 @@ function buildPassportDocHtml(){
     `Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':ss+' сек'}`,
     `Стресс: ${stressTxt}`
   ]))}
-  ${block('Системы организма', R.length?groupLabs(R).map(([sy,arr])=>`<p style="margin:8px 0 2px;font-weight:700">${sy}${arr.some(l=>l.st!='ok')?' — есть отклонения':' — в норме'}</p>`+li(arr.map(l=>`${l.n}: ${l.v} ${l.u} — ${LBL[l.st]||l.st}`))).join(''):'<p style="color:#666">Анализы не введены.</p>')}
+  ${block('Системы организма', R.length?groupLabs(R).map(([sy,arr])=>`<p style="margin:8px 0 2px;font-weight:700">${sy}${arr.some(l=>l.st!='ok')?' — есть отклонения':' — в норме'}</p>`+li(arr.map(l=>`${l.n}: ${l.v} ${l.u} — ${LBL[l.st]||l.st}`))+(docNote(sy,arr)?`<p style="margin:2px 0 8px;color:#A3241B;font-size:12px">${docNote(sy,arr)}</p>`:'')).join(''):'<p style="color:#666">Анализы не введены.</p>')}
   ${bad.some(l=>l.st=='cr')?'<p style="background:#F9DAD6;color:#A3241B;padding:8px 10px;border-radius:6px;font-size:12px">Есть критические отклонения — консультация врача.</p>':''}
   ${block('Факторы риска', risks.length?li(risks):'<p style="color:#666">Значимых факторов не выявлено.</p>')}
   ${block('Цели', `<p>${goalTxt}${S.tw?' до '+S.tw+' кг за '+(S.weeks||12)+' нед.':''}${S.bf||S.tbf?`. Жир: ${S.bf||'—'}% → ${S.tbf||'—'}%`:''}${S.mus?`. Мышцы: ${S.mus}`:''}</p>`)}
