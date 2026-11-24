@@ -351,7 +351,7 @@ textarea{min-height:90px}
 <p class="sub">Введите значения — статус появится сразу. Референсы подобраны по полу и возрасту из анкеты.</p>
 <p class="note no-print" style="margin-bottom:12px">Значения сохраняются в анкету автоматически.</p>
 <div id="labmsg"></div>
-<div class="scroll"><table><thead><tr><th>Показатель</th><th>Значение</th><th>Ед.</th><th>Норма</th><th>Статус</th></tr></thead><tbody id="labrows"></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>Показатель</th><th>Система</th><th>Значение</th><th>Ед.</th><th>Норма</th><th>Статус</th></tr></thead><tbody id="labrows"></tbody></table></div>
 </div></section>
 
 <section id="kbzhu"><div class="card"><h2>Цель</h2><div class="grid">
@@ -362,7 +362,20 @@ textarea{min-height:90px}
 <label>Жир желаемый, %<input id="tbf" type="number" min="3" max="60" placeholder="например, 22"></label>
 <label>Мышцы, цель<input id="mus" placeholder="например, +2 кг сухой массы"></label>
 <label>Спортивная цель<select id="sport"><option>Не выбрана</option><option>Сила</option><option>Выносливость</option><option>Гибкость</option><option>Восстановление</option><option>Накачать ягодицы</option><option>Набрать мышечную массу</option><option>Накачать пресс</option><option>Укрепить спину и осанку</option><option>Накачать ноги</option><option>Подтянуть руки и плечи</option><option>Подтянуть всё тело и сжечь жир</option></select></label>
-</div></div><div id="kres"></div><div id="exres"></div></section>
+</div>
+<details style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">Как узнать процент жира</summary>
+<div class="note" style="margin-top:8px;line-height:1.55">
+<p><b>1. Умные весы (биоимпеданс).</b> Самый простой способ: встаньте на весы утром натощак, в одинаковых условиях. Это приблизительная оценка, ошибка бывает 3–5%. Сравнивайте только показания с одних и тех же весов.</p>
+<p><b>2. Формула по обхватам (метод ВМС США).</b> Нужны сантиметровая лента и измерения в сантиметрах: рост, обхват шеи (под кадыком), обхват талии (на уровне пупка) и для женщин ещё обхват бёдер (по самой широкой части).<br>
+Мужчины: % жира = 495 / (1,0324 − 0,19077 × lg(талия − шея) + 0,15456 × lg(рост)) − 450<br>
+Женщины: % жира = 495 / (1,29579 − 0,35004 × lg(талия + бёдра − шея) + 0,22100 × lg(рост)) − 450<br>
+Здесь lg — десятичный логарифм (есть на любом инженерном калькуляторе).</p>
+<p><b>3. Формула по ИМТ (Дейренберг).</b> % жира = 1,20 × ИМТ + 0,23 × возраст − 10,8 × пол − 5,4, где пол: 1 для мужчин и 0 для женщин. ИМТ = вес (кг) / рост (м)². Он показан в «Паспорте». Формула грубая: не учитывает мышцы, поэтому у тех, кто занимается силовыми, завышает результат.</p>
+<p><b>4. Калипер или DEXA.</b> Калипер измеряет складки кожи (нужен опыт). DEXA в клинике даёт самый точный результат.</p>
+<p><b>Ориентиры для взрослых:</b> женщины: спортивный уровень 14–20%, фитнес 21–24%, средний 25–31%, ожирение от 32%. Мужчины: спортивный уровень 6–13%, фитнес 14–17%, средний 18–24%, ожирение от 25%.</p>
+<p>Любой способ даёт приблизительный результат. Лучше всего выбрать один метод и смотреть на изменения раз в 2–4 недели.</p>
+</div></details>
+</div><div id="kres"></div><div id="exres"></div></section>
 
 <section id="compare"><div class="card"><h2>Сравнение анкет</h2>
 <div class="grid">
@@ -450,6 +463,16 @@ const LABS=[
 {n:'Билирубин общий',u:'мкмоль/л',r:()=>[5,21]},
 {n:'Кальций',u:'ммоль/л',r:()=>[2.15,2.55]}
 ];
+const LAB_SYS={'Гемоглобин':'Кроветворная система','Ферритин':'Кроветворная система','Железо':'Кроветворная система','Витамин B12':'Кроветворная система','Тромбоциты':'Кроветворная система',
+'Глюкоза натощак':'Обмен веществ и эндокринная система','ТТГ':'Обмен веществ и эндокринная система',
+'Холестерин общий':'Сердечно-сосудистая система','ЛПНП':'Сердечно-сосудистая система','ЛПВП':'Сердечно-сосудистая система','Триглицериды':'Сердечно-сосудистая система',
+'Витамин D (25-OH)':'Костная система','Кальций':'Костная система',
+'АЛТ':'Печень и желчевыводящие пути','Билирубин общий':'Печень и желчевыводящие пути',
+'Лейкоциты':'Иммунная система','СОЭ':'Иммунная система',
+'Креатинин':'Почки и мочевыделительная система'};
+LABS.forEach(l=>{l.sys=LAB_SYS[l.n]||'Прочее'});
+function groupLabs(R){const g={};R.forEach(l=>{(g[l.sys]=g[l.sys]||[]).push(l)});return Object.entries(g)}
+
 const SY={'Кроветворная':['Гемоглобин','Тромбоциты','Ферритин','Железо','Витамин B12'],'Иммунная и костная':['Лейкоциты','СОЭ','Витамин D (25-OH)','Кальций'],'Эндокринная':['Глюкоза натощак','ТТГ'],'Сердечно-сосудистая':['Холестерин общий','ЛПНП','ЛПВП','Триглицериды'],'Печень и почки':['АЛТ','Билирубин общий','Креатинин']};
 LABS.forEach(l=>l.sys=Object.keys(SY).find(k=>SY[k].includes(l.n))||'Прочее');
 
@@ -593,7 +616,7 @@ function updSelfTests(){
 function todayStr(){return new Date().toLocaleDateString('ru-RU')}
 
 function buildLabs(){
- $('labrows').innerHTML=LABS.map((l,i)=>`<tr><td>${l.n}</td><td><input type="number" step="any" autocomplete="off" data-lab="${i}" aria-label="${l.n}" value="${S['lab'+i]??''}"></td><td>${l.u}</td><td id="ref${i}"></td><td id="st${i}"></td></tr>`).join('');
+ $('labrows').innerHTML=LABS.map((l,i)=>`<tr><td>${l.n}</td><td>${l.sys}</td><td><input type="number" step="any" autocomplete="off" data-lab="${i}" aria-label="${l.n}" value="${S['lab'+i]??''}"></td><td>${l.u}</td><td id="ref${i}"></td><td id="st${i}"></td></tr>`).join('');
  document.querySelectorAll('[data-lab]').forEach(e=>{
    const onLab=()=>{S['lab'+e.dataset.lab]=e.value.replace(',','.');autoSave();updLabs()};
    e.addEventListener('input',onLab);
@@ -721,7 +744,7 @@ function passport(){
  <li>Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':`<span class="b ${sitZ}">${ss} сек</span>`}</li>
  <li>Стресс: ${sf===''||sf==null?'не измерен':`<span class="b ${stressZ}">${['почти никогда','редко','иногда','часто','очень часто'][sf]||sf}</span>`}</li>
  </ul>
- <h3>Анализы</h3>${R.length?`<ul>${R.map(l=>`<li>${l.n}: ${l.v} ${l.u} <span class="b ${l.st}">${LBL[l.st]}</span></li>`).join('')}</ul>`:'<p class="note">Анализы не введены.</p>'}
+ <h3>Системы организма</h3>${R.length?groupLabs(R).map(([sy,arr])=>`<p><b>${sy}</b></p><ul>${arr.map(l=>`<li>${l.n}: ${l.v} ${l.u} <span class="b ${l.st}">${LBL[l.st]}</span></li>`).join('')}</ul>`).join(''):'<p class="note">Анализы не введены.</p>'}
  ${bad.some(l=>l.st=='cr')?'<div class="msg">Есть критические отклонения — консультация врача.</div>':''}
  <h3>Системы организма</h3>${Object.keys(sys).length?`<ul>${Object.entries(sys).map(([q,ls])=>{const o=ls.filter(l=>l.st!='ok');return`<li><b>${q}:</b> ${o.length?'отклонения — '+o.map(l=>l.n).join(', '):'в норме'}</li>`}).join('')}</ul>`:'<p class="note">Появятся после ввода анализов.</p>'}
  <h3>Факторы риска</h3>${risks.length?`<ul>${risks.map(r=>`<li>${r}</li>`).join('')}</ul>`:'<p class="note">Значимых факторов не выявлено.</p>'}
@@ -790,7 +813,7 @@ function buildPassportDocHtml(){
     `Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':ss+' сек'}`,
     `Стресс: ${stressTxt}`
   ]))}
-  ${block('Анализы', R.length?li(R.map(l=>`${l.n}: ${l.v} ${l.u} — ${LBL[l.st]||l.st}`)):'<p style="color:#666">Анализы не введены.</p>')}
+  ${block('Системы организма', R.length?groupLabs(R).map(([sy,arr])=>`<p style="margin:8px 0 2px;font-weight:700">${sy}${arr.some(l=>l.st!='ok')?' — есть отклонения':' — в норме'}</p>`+li(arr.map(l=>`${l.n}: ${l.v} ${l.u} — ${LBL[l.st]||l.st}`))).join(''):'<p style="color:#666">Анализы не введены.</p>')}
   ${bad.some(l=>l.st=='cr')?'<p style="background:#F9DAD6;color:#A3241B;padding:8px 10px;border-radius:6px;font-size:12px">Есть критические отклонения — консультация врача.</p>':''}
   ${block('Факторы риска', risks.length?li(risks):'<p style="color:#666">Значимых факторов не выявлено.</p>')}
   ${block('Цели', `<p>${goalTxt}${S.tw?' до '+S.tw+' кг за '+(S.weeks||12)+' нед.':''}${S.bf||S.tbf?`. Жир: ${S.bf||'—'}% → ${S.tbf||'—'}%`:''}${S.mus?`. Мышцы: ${S.mus}`:''}</p>`)}
