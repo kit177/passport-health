@@ -396,19 +396,12 @@ textarea{min-height:90px}
 <label>Мышцы, цель<input id="mus" placeholder="например, +2 кг сухой массы"></label>
 <label>Спортивная цель<select id="sport"><option>Не выбрана</option><option>Сила</option><option>Выносливость</option><option>Гибкость</option><option>Восстановление</option><option>Накачать ягодицы</option><option>Набрать мышечную массу</option><option>Накачать пресс</option><option>Укрепить спину и осанку</option><option>Накачать ноги</option><option>Подтянуть руки и плечи</option><option>Подтянуть всё тело и сжечь жир</option></select></label>
 </div>
-<div id="fatCalc" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line,#ccc)">
-<h3>Калькулятор % жира</h3>
-<div class="grid">
-<label>Пол<select id="fc_sex"><option value="f">Женский</option><option value="m">Мужской</option></select></label>
-<label>Возраст, лет<input id="fc_age" type="number" min="18" max="99" placeholder="например, 30"></label>
-<label>Рост, см<input id="fc_h" type="number" min="120" max="230" placeholder="например, 165"></label>
-<label>Вес, кг<input id="fc_w" type="number" min="30" max="250" step="0.1" placeholder="например, 60"></label>
-<label>Обхват шеи, см<input id="fc_neck" type="number" min="20" max="60" step="0.1" placeholder="например, 32"></label>
-<label>Обхват талии, см<input id="fc_waist" type="number" min="40" max="200" step="0.1" placeholder="например, 72"></label>
-<label id="fc_hipsWrap">Обхват бёдер, см<input id="fc_hips" type="number" min="50" max="200" step="0.1" placeholder="например, 98"></label>
-</div>
-<button class="btn small" type="button" id="fatBtn" style="margin-top:10px">Рассчитать</button>
-<div id="fatOut" style="margin-top:10px"></div>
+<div class="note" style="margin-top:14px;line-height:1.55">
+<p><b>Как узнать процент жира.</b> Простой способ — посчитать по формуле, нужны только пол, возраст, рост и вес.</p>
+<p>1. Найдите ИМТ: вес (кг) ÷ рост (м) ÷ рост (м).<br>
+2. Подставьте в формулу: <b>% жира = 1,2 × ИМТ + 0,23 × возраст − 10,8 × пол − 5,4</b>, где пол: 1 для мужчин и 0 для женщин.</p>
+<p>Пример: женщина, 30 лет, рост 165 см, вес 60 кг. ИМТ = 60 ÷ 1,65 ÷ 1,65 ≈ 22,0. Процент жира = 1,2 × 22,0 + 0,23 × 30 − 0 − 5,4 ≈ 28%.</p>
+<p>Формула приблизительная: не учитывает мышечную массу, ошибка бывает 3–5%.</p>
 </div>
 </div><div id="kres"></div><div id="exres"></div></section>
 
@@ -602,34 +595,6 @@ function jetlagHours(){
 }
 const FT_FLEX=['не достаю до пальцев ног','достаю кончиками пальцев','достаю ладонями до стоп и дальше'];
 const FT_COORD=['точно, без промахов','1–2 промаха','3 и более промахов, дрожь или головокружение'];
-function fatCalc(){
-  const out=$('fatOut');if(!out)return;
-  const g=id=>{const v=parseFloat(($(id)||{}).value);return isNaN(v)?0:v};
-  const m=$('fc_sex').value=='m',a=g('fc_age'),h=g('fc_h'),w=g('fc_w'),nk=g('fc_neck'),wa=g('fc_waist'),hp=g('fc_hips');
-  const res=[],miss=[];
-  const needNavy=[];
-  if(!h)needNavy.push('рост');if(!nk)needNavy.push('шея');if(!wa)needNavy.push('талия');if(!m&&!hp)needNavy.push('бёдра');
-  let navy=null;
-  if(!needNavy.length){
-    const d=m?(wa-nk):(wa+hp-nk);
-    if(d>0)navy=m?495/(1.0324-0.19077*Math.log10(d)+0.15456*Math.log10(h))-450:495/(1.29579-0.35004*Math.log10(d)+0.22100*Math.log10(h))-450;
-  }
-  if(navy!=null&&isFinite(navy)&&navy>2&&navy<60)res.push(['По обхватам (метод ВМС США)',navy]);
-  else miss.push(needNavy.length?'для расчёта по обхватам введите: '+needNavy.join(', '):'проверьте обхваты: талия (для женщин талия + бёдра) должна быть больше шеи');
-  let dei=null;
-  if(w&&h&&a>=18){const bmi=w/Math.pow(h/100,2);dei=1.2*bmi+0.23*a-10.8*(m?1:0)-5.4}
-  if(dei!=null&&dei>2&&dei<60)res.push(['По ИМТ (формула Дейренберга, грубая оценка)',dei]);
-  else miss.push('для расчёта по ИМТ введите: возраст (от 18 лет), рост, вес');
-  if(!res.length){out.innerHTML='<div class="msg">Заполните поля: '+miss.join('; ')+'.</div>';return}
-  const main=res[0][1];
-  out.innerHTML='<ul>'+res.map(r=>'<li>'+r[0]+': <b>'+r[1].toFixed(1)+'%</b></li>').join('')+'</ul>'
-   +(miss.length?'<p class="note">'+miss.join('; ')+'.</p>':'')
-   +'<p class="note">Оценка приблизительная, ошибка бывает 3–5%.</p>'
-   +'<button class="btn small sec" type="button" id="fatApply">Подставить '+main.toFixed(1)+'% в поле «Жир сейчас»</button>';
-  const ap=$('fatApply');
-  if(ap)ap.onclick=()=>{const e=$('bf');if(e){e.value=main.toFixed(1);e.dispatchEvent(new Event('input',{bubbles:true}))}};
-}
-function fatSexToggle(){const w=$('fc_hipsWrap'),sx=$('fc_sex');if(w&&sx)w.style.display=sx.value=='m'?'none':''}
 function ftNorm(){
   const a=age(),x=a==null?30:a;
   let end,bal,band;
@@ -1029,8 +994,7 @@ const EX=[
 ];
 $('extra').innerHTML=EX.map(([t,fs])=>`<div class="card"><h2>${t}</h2><div class="grid">${fs.map(([id,lb,ty,ph])=>`<label>${lb}${Array.isArray(ty)?`<select id="${id}">${ty.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="${id}" autocomplete="off"${ty==='number'?' type="number"':''}${ph?` placeholder="${ph}"`:''}>`}</label>`).join('')}</div></div>`).join('');
 EX.forEach(g=>g[1].forEach(f=>IDS.push(f[0])));
-const fatBtn=$('fatBtn');if(fatBtn)fatBtn.onclick=fatCalc;
-const fcSex=$('fc_sex');if(fcSex){fcSex.onchange=fatSexToggle;fatSexToggle()}
+
 
 let saveTimer=null;
 function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveQ,700)}
