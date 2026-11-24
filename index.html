@@ -328,7 +328,7 @@ textarea{min-height:90px}
 
 <div class="card" id="ftCard"><h2>Функциональные тесты</h2>
 <p class="sub" style="margin-bottom:14px">Без оборудования. Выполняйте после разминки. Результаты попадают в паспорт здоровья.</p>
-<h3>1. Выносливость: наклоны за 15 секунд</h3>
+<h3>1. Выносливость: наклоны</h3>
 <p class="note">Встаньте, ноги на ширине плеч. Тянитесь правой рукой к левой ноге, затем левой рукой к правой, и так по очереди как можно быстрее. Считайте все касания за 15 секунд. Засеките время по таймеру.</p>
 <label>Количество касаний<input id="fn15" type="number" min="0" max="40" placeholder="например, 12"></label>
 <div id="fn15Out" class="note" style="margin:8px 0 16px"></div>
@@ -830,8 +830,8 @@ function passport(){
  <li>Задержка дыхания: ${isNaN(bh)?'не измерен':`<span class="b ${breathZ}">${bh} сек</span>`}</li>
  <li>Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':`<span class="b ${sitZ}">${ss} сек</span>`}</li>
  <li>Стресс: ${sf===''||sf==null?'не измерен':`<span class="b ${stressZ}">${['почти никогда','редко','иногда','часто','очень часто'][sf]||sf}</span>`}</li>
- ${ftResults().map(r=>`<li>${r.n}: <span class="b ${r.z}">${r.v}</span>${r.doc?' — '+r.doc:''}</li>`).join('')}
  </ul>
+ <h3>Функциональные тесты</h3>${ftResults().length?`<ul>${ftResults().map(r=>`<li>${r.n}: <span class="b ${r.z}">${r.v}</span>${r.doc?' — '+r.doc:''}</li>`).join('')}</ul>`:'<p class="note">Тесты не выполнены.</p>'}
  <h3>Анализы</h3>${R.length?`<ul>${R.map(l=>`<li>${l.n}: ${l.v} ${l.u} <span class="b ${l.st}">${LBL[l.st]}</span></li>`).join('')}</ul>`:'<p class="note">Анализы не введены.</p>'}
  ${bad.some(l=>l.st=='cr')?'<div class="msg">Есть критические отклонения — консультация врача.</div>':''}
  <h3>Системы организма</h3>${Object.keys(sys).length?`<ul>${Object.entries(sys).map(([q,ls])=>{const o=ls.filter(l=>l.st!='ok');return`<li><b>${q}:</b> ${o.length?'отклонения — '+o.map(l=>l.n).join(', ')+'. '+docNote(q,ls):'в норме'}</li>`}).join('')}</ul>`:'<p class="note">Появятся после ввода анализов.</p>'}
@@ -900,9 +900,9 @@ function buildPassportDocHtml(){
     `Пищевой джетлаг: ${jh==null?'не измерен':jh.toFixed(1)+' ч'+(jh>2?' — есть джетлаг':' — норма')}`,
     `Задержка дыхания: ${isNaN(bh)?'не измерен':bh+' сек'}`,
     `Тест «Сесть–Встать»: ${isNaN(ss)?'не измерен':ss+' сек'}`,
-    `Стресс: ${stressTxt}`,
-    ...ftResults().map(r=>`${r.n}: ${r.v}${r.doc?' — '+r.doc:''}`)
+    `Стресс: ${stressTxt}`
   ]))}
+  ${block('Функциональные тесты', ftResults().length?li(ftResults().map(r=>`${r.n}: ${r.v}${r.doc?' — '+r.doc:''}`)):'<p style="color:#666">Тесты не выполнены.</p>')}
   ${block('Анализы', R.length?li(R.map(l=>`${l.n}: ${l.v} ${l.u} — ${LBL[l.st]||l.st}`)):'<p style="color:#666">Анализы не введены.</p>')}
   ${block('Системы организма', R.length?li(groupLabs(R).map(([q,ls])=>{const o=ls.filter(l=>l.st!='ok');return`<b>${q}:</b> ${o.length?'отклонения — '+o.map(l=>l.n).join(', ')+'. '+docNote(q,ls):'в норме'}`})):'<p style="color:#666">Появятся после ввода анализов.</p>')}
   ${bad.some(l=>l.st=='cr')?'<p style="background:#F9DAD6;color:#A3241B;padding:8px 10px;border-radius:6px;font-size:12px">Есть критические отклонения — консультация врача.</p>':''}
